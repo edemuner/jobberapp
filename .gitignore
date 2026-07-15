@@ -1,0 +1,5 @@
+docker-volumes/
+node_modules/
+.env
+.env.*
+*.log
