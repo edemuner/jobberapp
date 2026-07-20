@@ -4,12 +4,14 @@ import { Logger } from 'winston';
 import { config } from './config';
 import { Application } from 'express';
 import http from 'http';
+import { healthRoutes } from './routes';
 
 const SERVER_PORT = 4001;
 const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificationServer', 'debug');
 
 export function start(app: Application): void {
     startServer(app);
+    app.use('', healthRoutes);
     startQueues();
     startElasticSearch();
 }
