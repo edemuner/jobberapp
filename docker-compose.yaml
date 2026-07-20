@@ -46,6 +46,9 @@ services:
     container_name: rabbitmq_container
     image: rabbitmq:4.3.2-management-alpine
     restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=myuser
+      - RABBITMQ_DEFAULT_PASS=mypassword
     ports:
       - '5672:5673'
       - '15672:15673'

@@ -3,3 +3,7 @@ node_modules/
 .env
 .env.*
 *.log
+secrets.md
+
+# jobber-shared is its own published repo (github.com/edemuner/jobber-shared), checked out here for local dev
+server/9-jobber-shared/
