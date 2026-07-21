@@ -66,7 +66,7 @@ services:
       - '9200:9200'
       - '9300:9300'
     volumes:
-      - ./docker-volumes/elasticsearc-data:/usr/share/elasticsearch/data
+      - ./docker-volumes/elasticsearch-data:/usr/share/elasticsearch/data
     networks:
       - elastic
   kibana:
