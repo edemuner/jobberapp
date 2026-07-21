@@ -5,7 +5,7 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
-    "lib": ["dom", "esnext"],
+    "lib": ["dom", "ES2015"],
     "module": "NodeNext",
     "moduleResolution": "nodenext",
     "outDir": "./build",
@@ -18,7 +18,6 @@
     "resolveJsonModule": true,
     "noImplicitAny":true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "esModuleInterop": true,
     "alwaysStrict": true,
     "plugins": [
