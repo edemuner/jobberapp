@@ -7,6 +7,9 @@ import http from 'http';
 import { healthRoutes } from './routes';
 import { checkConnection } from './elasticsearch';
 import { createConnection } from './queues/connection';
+import { consumeAuthEmailMessages, consumeOrderEmailMessages } from './queues/email.consumer';
+import { Channel } from 'amqplib';
+
 
 const SERVER_PORT = 4001;
 const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificationServer', 'debug');
@@ -19,7 +22,18 @@ export function start(app: Application): void {
 }
 
 async function startQueues(): Promise<void> {
-    await createConnection();
+    const emailChannel: Channel = await createConnection() as Channel;
+    await consumeAuthEmailMessages(emailChannel);
+    await consumeOrderEmailMessages(emailChannel);
+
+    await emailChannel.assertExchange('jobber-email-notification', 'direct');
+    const message = JSON.stringify({name: 'jobber-auth'})
+    emailChannel.publish('jobber-email-notification', 'auth-email', Buffer.from(message)); 
+
+    await emailChannel.assertExchange('jobber-order-notification', 'direct');
+    const message2 = JSON.stringify({name: 'jobber-order'})
+    emailChannel.publish('jobber-order-notification', 'order-email', Buffer.from(message2)); 
+
 }
 
 function startElasticSearch(): void {
