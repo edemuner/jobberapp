@@ -1,13 +1,13 @@
 import { winstonLogger } from '@edemuner/jobber-shared';
-import { config } from '@notifications/config';
+import { jobberConfig } from '@notifications/config';
 import client, { Channel, ChannelModel } from 'amqplib';
 import { Logger } from 'winston';
 
-const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificationQueueConnection', 'debug');
+const log: Logger = winstonLogger(`${jobberConfig.ELASTIC_SEARCH_URL}`, 'notificationQueueConnection', 'debug');
 
 async function createConnection(): Promise<Channel | undefined> {
     try {
-        const connection: ChannelModel = await client.connect(`${config.RABBITMQ_ENDPOINT}`);
+        const connection: ChannelModel = await client.connect(`${jobberConfig.RABBITMQ_ENDPOINT}`);
         const channel: Channel = await connection.createChannel();
         log.info('Notification server connected to queue successfully...');
         closeConnection(channel, connection);

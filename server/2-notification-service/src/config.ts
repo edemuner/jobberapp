@@ -20,4 +20,4 @@ class Config {
     }
 }
 
-export const config: Config = new Config();
+export const jobberConfig: Config = new Config();

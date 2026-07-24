@@ -1,10 +1,10 @@
 import { winstonLogger } from '@edemuner/jobber-shared';
 import { Channel, ConsumeMessage } from 'amqplib';
-import { config } from '../config';
+import { jobberConfig } from '../config';
 import { Logger } from 'winston';
 import { createConnection } from './connection';
 
-const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'emailConsumer', 'debug');
+const log: Logger = winstonLogger(`${jobberConfig.ELASTIC_SEARCH_URL}`, 'emailConsumer', 'debug');
 
 async function consumeAuthEmailMessages(channel: Channel): Promise<void> {
     try {

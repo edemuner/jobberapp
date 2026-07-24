@@ -1,13 +1,13 @@
 import { Client } from '@elastic/elasticsearch';
-import { config } from './config';
+import { jobberConfig } from './config';
 import { Logger } from 'winston';
 import { winstonLogger } from '@edemuner/jobber-shared';
 import { ClusterHealthResponse } from '@elastic/elasticsearch/lib/api/types';
 
-const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificationElasticSearchServer', 'debug');
+const log: Logger = winstonLogger(`${jobberConfig.ELASTIC_SEARCH_URL}`, 'notificationElasticSearchServer', 'debug');
 
 const elasticSearchClient = new Client({
-    node: `${config.ELASTIC_SEARCH_URL}`
+    node: `${jobberConfig.ELASTIC_SEARCH_URL}`
 });
 
 export async function checkConnection(): Promise<void>{
