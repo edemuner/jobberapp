@@ -1,5 +1,4 @@
 import 'express-async-errors';
-import { Logger } from 'winston';
 import { logger } from './logger';
 import { Application } from 'express';
 import http from 'http';
@@ -11,7 +10,7 @@ import { Channel } from 'amqplib';
 
 
 const SERVER_PORT = 4001;
-const log: Logger = logger.for('notificationServer');
+const log = logger.for('notificationServer');
 
 export function start(app: Application): void {
     startServer(app);

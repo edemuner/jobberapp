@@ -1,8 +1,7 @@
 import { IEmailLocals } from "@edemuner/jobber-shared";
 import { logger } from "@notifications/logger";
-import { Logger } from "winston";
 
-const log: Logger = logger.for('mailTransport');
+const log = logger.for('mailTransport');
 
 async function sendEmail(template: string, receiverEmail: string, locals: IEmailLocals): Promise<void>{
     try {

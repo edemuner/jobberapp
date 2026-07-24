@@ -1,9 +1,8 @@
 import { Channel, ConsumeMessage } from 'amqplib';
-import { Logger } from 'winston';
 import { logger } from '../logger';
 import { createConnection } from './connection';
 
-const log: Logger = logger.for('emailConsumer');
+const log = logger.for('emailConsumer');
 
 async function consumeAuthEmailMessages(channel: Channel): Promise<void> {
     try {
