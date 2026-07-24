@@ -1,9 +1,9 @@
-import { winstonLogger } from '@edemuner/jobber-shared';
 import { jobberConfig } from '@notifications/config';
+import { logger } from '@notifications/logger';
 import client, { Channel, ChannelModel } from 'amqplib';
 import { Logger } from 'winston';
 
-const log: Logger = winstonLogger(`${jobberConfig.ELASTIC_SEARCH_URL}`, 'notificationQueueConnection', 'debug');
+const log: Logger = logger.for('notificationQueueConnection');
 
 async function createConnection(): Promise<Channel | undefined> {
     try {

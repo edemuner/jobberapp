@@ -1,7 +1,6 @@
-import { winstonLogger } from '@edemuner/jobber-shared';
 import 'express-async-errors';
 import { Logger } from 'winston';
-import { jobberConfig } from './config';
+import { logger } from './logger';
 import { Application } from 'express';
 import http from 'http';
 import { healthRoutes } from './routes';
@@ -12,7 +11,7 @@ import { Channel } from 'amqplib';
 
 
 const SERVER_PORT = 4001;
-const log: Logger = winstonLogger(`${jobberConfig.ELASTIC_SEARCH_URL}`, 'notificationServer', 'debug');
+const log: Logger = logger.for('notificationServer');
 
 export function start(app: Application): void {
     startServer(app);

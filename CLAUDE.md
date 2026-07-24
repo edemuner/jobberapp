@@ -1,6 +1,35 @@
+## Project Description
+
+**Jobberapp** is a personal study project (microservices/Node.js learning path) implementing a Fiverr-style gig marketplace: sellers list gigs, buyers purchase them.
+
+### Intended architecture
+- An API gateway in front of independently deployable services, communicating cross-service via RabbitMQ events (e.g. order placed → notification service emails the buyer) and via direct HTTP for gateway-to-service calls.
+- Services follow a numbered directory convention (`2-notification-service`, `9-jobber-shared`, ...), implying slots for: gateway, authentication, users/buyer, gig, order, review, notification, and a shared library — numbers 1 and 3-8 are reserved for services not yet started.
+- **Currently implemented**: only `2-notification-service` and `9-jobber-shared` have code. Everything else is inferred intent — from `jobber-shared`'s domain interfaces (`auth`, `buyer`, `seller`, `gig`, `order`, `review`, `chat`, `search`) and the `verifyGatewayRequest` service whitelist (`auth`, `seller`, `gig`, `search`, `order`, `buyer`, `message`, `review`).
+
+### Shared library — `9-jobber-shared` (published as `@edemuner/jobber-shared`)
+- Published to GitHub Packages via CI on push to `main` (patch-bumped automatically); consumed by services as a real npm dependency, not a workspace symlink — so a change here doesn't reach other services until it's published and their `package.json` is bumped.
+- Flat `src/`, exporting: per-entity domain interfaces (auth/buyer/seller/gig/order/review/chat/search/email), a `CustomError` class hierarchy (`BadRequestError`, `NotFoundError`, `NotAuthorizedError`, `FileTooLargeError`, `ServerError`) built on `http-status-codes`, a `verifyGatewayRequest` Express middleware (JWT-based gateway token check), a `Logger` class (`new Logger(elasticSearchNode, serviceName, level)`, Winston + Elasticsearch transport) whose `.for(moduleName)` returns a winston child logger, generic string helpers, and Cloudinary upload helpers.
+
+### Tech stack
+- TypeScript on Node.js; Express for HTTP (v4 in notification-service, though jobber-shared's typings target Express v5 — worth reconciling later).
+- Messaging: RabbitMQ via `amqplib` — direct exchanges, durable queues, routing-key bindings per event type (e.g. `jobber-email-notification`/`auth-email`, `jobber-order-notification`/`order-email`).
+- Datastores (via Docker Compose): MongoDB, MySQL, PostgreSQL, Redis — polyglot persistence, presumably one store per future service.
+- Observability: Elasticsearch + Kibana, fed by Winston's Elasticsearch transport.
+- Email (scaffolded, not yet wired up): `nodemailer` + `email-templates` (ejs templating).
+- Media uploads: Cloudinary, via jobber-shared helpers.
+- Local dev infra: root `docker-compose.yaml` runs all datastores/messaging/observability; each service has its own `dev` script (nodemon + ts-node path registration).
+
+### Patterns observed in the code
+- Config: `dotenv` + a singleton `Config` class instance exported once (`export const jobberConfig = new Config()`) — not raw `process.env` access scattered through the code.
+- Logging: each service constructs one `Logger` instance in its own `src/logger.ts` (composition root, using that service's `jobberConfig`), exported and imported by every other module. Individual modules call `logger.for('moduleName')` to get a winston child logger — this tags logs with both `service` (the actual service name, set once at construction) and `module` (per call site) as separate structured Elasticsearch fields, instead of one file per module each opening its own Elasticsearch transport connection.
+- RabbitMQ consumers: assert exchange → assert durable queue → bind with routing key → `channel.consume(...)`, repeated per event type.
+- TypeScript path aliases (e.g. `@notifications/*`) via `typescript-transform-paths`/`tsc-alias`, used inconsistently alongside relative imports — check which style a given file already uses before adding new imports.
+
 ## RULES
 
-1. This project (9-jobber-shared) is exempt from the global feat/[ticketID] / fix/[ticketID] branch requirement — commits can be made directly to `main`.
+1. This entire project (jobberapp — every subdirectory, including `2-notification-service`, `9-jobber-shared`, and any future numbered service) is exempt from the global feat/[ticketID] / fix/[ticketID] branch requirement, since it's a personal study project with no ticket tracking — commits can be made directly to `main`.
+2. Keep the "Project Description" section above current — after any significant change (new service started, new dependency/technology adopted, architecture or pattern shift), the responsible agent must update it to reflect the new state, rather than letting it drift from the code.
 
 ## Teaching style
 
