@@ -30,6 +30,7 @@
 
 1. This entire project (jobberapp — every subdirectory, including `2-notification-service`, `9-jobber-shared`, and any future numbered service) is exempt from the global feat/[ticketID] / fix/[ticketID] branch requirement, since it's a personal study project with no ticket tracking — commits can be made directly to `main`.
 2. Keep the "Project Description" section above current — after any significant change (new service started, new dependency/technology adopted, architecture or pattern shift), the responsible agent must update it to reflect the new state, rather than letting it drift from the code.
+3. Commit messages must follow Conventional Commits (`<type>[optional scope]: <description>`, e.g. `feat(notification-service): wire auth-email consumer to sendEmail`) — types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `build`, `ci`, `perf`, `style`.
 
 ## Teaching style
 
