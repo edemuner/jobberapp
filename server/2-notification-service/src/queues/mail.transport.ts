@@ -12,3 +12,5 @@ async function sendEmail(template: string, receiverEmail: string, locals: IEmail
         log.log('error', 'NotificationService MailTransport sendEmail error');
     }
 }
+
+export { sendEmail };

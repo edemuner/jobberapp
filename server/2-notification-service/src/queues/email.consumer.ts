@@ -1,6 +1,9 @@
 import { Channel, ConsumeMessage } from 'amqplib';
 import { logger } from '../logger';
 import { createConnection } from './connection';
+import { IEmailLocals } from '@edemuner/jobber-shared';
+import { jobberConfig } from '@notifications/config';
+import { sendEmail } from './mail.transport';
 
 const log = logger.for('emailConsumer');
 
@@ -19,7 +22,16 @@ async function consumeAuthEmailMessages(channel: Channel): Promise<void> {
 
         await channel.bindQueue(jobberQueue.queue, exchangeName, routingKey);
         channel.consume(jobberQueue.queue, async (msg: ConsumeMessage | null) => {
-            console.log(JSON.parse(msg!.content.toString()))
+            const { receiverEmail, username, verifyLink, resetLink, template } = JSON.parse(msg!.content.toString());
+            const locals: IEmailLocals = {
+                appLink: `${jobberConfig.CLIENT_URL}`,
+                appIcon: 'https://ibb.co/P7YwMV5',
+                username,
+                verifyLink,
+                resetLink,
+            }
+
+            await sendEmail(template, receiverEmail, locals);
             channel.ack(msg!)
         })
     } catch(error){
