@@ -20,6 +20,7 @@
     "noUnusedLocals": true,
     "esModuleInterop": true,
     "alwaysStrict": true,
+    "types": ["jest"],
     "plugins": [
       { "transform": "typescript-transform-paths" },
       { "transform": "typescript-transform-paths", "afterDeclaration": true },
