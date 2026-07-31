@@ -9,6 +9,7 @@ class Config {
     public SENDER_EMAIL_PASSWORD: string | undefined; 
     public RABBITMQ_ENDPOINT: string | undefined; 
     public ELASTIC_SEARCH_URL: string | undefined;
+    public APP_ICON_URL: string | undefined;
 
     constructor() {
         this.NODE_ENV = process.env.NODE_ENV || '';
@@ -17,6 +18,7 @@ class Config {
         this.SENDER_EMAIL_PASSWORD = process.env.SENDER_EMAIL_PASSWORD || '';
         this.RABBITMQ_ENDPOINT = process. env. RABBITMQ_ENDPOINT || '';
         this.ELASTIC_SEARCH_URL = process.env.ELASTIC_SEARCH_URL || '';
+        this.APP_ICON_URL = process.env.APP_ICON_URL || 'https://ibb.co/P7YwMV5';
     }
 }
 
