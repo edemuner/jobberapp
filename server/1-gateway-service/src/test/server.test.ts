@@ -11,9 +11,20 @@ jest.mock('hpp', () => jest.fn(() => 'hppMiddleware'));
 jest.mock('helmet', () => jest.fn(() => 'helmetMiddleware'));
 jest.mock('compression', () => jest.fn(() => 'compressionMiddleware'));
 jest.mock('express', () => ({
+    ...jest.requireActual('express'),
     json: jest.fn(() => 'jsonMiddleware'),
     urlencoded: jest.fn(() => 'urlencodedMiddleware')
 }));
+
+jest.mock('http', () => {
+    const actual = jest.requireActual('http');
+    const mockListen = jest.fn((_port: number, cb: () => void) => {
+        cb();
+        return {};
+    });
+    const mockHttpServerCtor = jest.fn().mockImplementation(() => ({ listen: mockListen }));
+    return { ...actual, Server: Object.assign(mockHttpServerCtor, { mockListen }) };
+});
 
 import cookieSession from 'cookie-session';
 import cors from 'cors';
@@ -22,28 +33,41 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { json, urlencoded } from 'express';
 
+import http from 'http';
+
 import { GatewayServer } from '../server';
 import { logger } from '../logger';
 
 import type { Application, NextFunction, Request, Response } from 'express';
 
-const mockLog = logger.for('test') as unknown as { log: jest.Mock };
+const mockHttpServerCtor = http.Server as unknown as jest.Mock & { mockListen: jest.Mock };
+const mockListen = mockHttpServerCtor.mockListen;
+
+const mockLog = logger.for('test') as unknown as { log: jest.Mock; info: jest.Mock };
 
 function createMockApp() {
     return { set: jest.fn(), use: jest.fn() } as unknown as jest.Mocked<Application>;
 }
 
+const flushMicrotasks = () => new Promise((resolve) => setImmediate(resolve));
+
 describe('GatewayServer', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        mockListen.mockImplementation((_port: number, cb: () => void) => {
+            cb();
+            return {};
+        });
+        mockHttpServerCtor.mockImplementation(() => ({ listen: mockListen }));
     });
 
     describe('start', () => {
-        it('wires up security, standard, and error-handling middleware on the app', () => {
+        it('wires up security, standard, and error-handling middleware on the app', async () => {
             const app = createMockApp();
             const server = new GatewayServer(app);
 
             server.start();
+            await flushMicrotasks();
 
             expect(app.set).toHaveBeenCalledWith('trust proxy', 1);
             expect(cookieSession).toHaveBeenCalledWith({
@@ -73,6 +97,37 @@ describe('GatewayServer', () => {
 
             expect(app.use).toHaveBeenCalledWith('*', expect.any(Function));
             expect(app.use).toHaveBeenCalledWith(expect.any(Function));
+
+            expect(mockHttpServerCtor).toHaveBeenCalledWith(app);
+            expect(mockListen).toHaveBeenCalledWith(4000, expect.any(Function));
+            expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining('Gateway server started with process ID'));
+            expect(mockLog.info).toHaveBeenCalledWith('Gateway server running on port 4000');
+        });
+
+        it('logs an error if constructing the http server throws', async () => {
+            mockHttpServerCtor.mockImplementationOnce(() => {
+                throw new Error('failed to bind port');
+            });
+            const app = createMockApp();
+            const server = new GatewayServer(app);
+
+            server.start();
+            await flushMicrotasks();
+
+            expect(mockLog.log).toHaveBeenCalledWith('error', 'GatewayService startServer() error method:', expect.any(Error));
+        });
+
+        it('logs an error if httpServer.listen throws', async () => {
+            mockListen.mockImplementationOnce(() => {
+                throw new Error('port already in use');
+            });
+            const app = createMockApp();
+            const server = new GatewayServer(app);
+
+            server.start();
+            await flushMicrotasks();
+
+            expect(mockLog.log).toHaveBeenCalledWith('error', 'GatewayService startServer() error method:', expect.any(Error));
         });
     });
 

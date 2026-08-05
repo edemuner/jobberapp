@@ -1,3 +1,5 @@
+import http from 'http';
+
 import { logger } from '@gateway/logger';
 import { Application, json, NextFunction, Request, Response, urlencoded } from 'express';
 import cookieSession from 'cookie-session';
@@ -8,7 +10,7 @@ import compression from 'compression';
 import { StatusCodes } from 'http-status-codes';
 import { CustomError, IErrorResponse } from '@edemuner/jobber-shared';
 
-// const SERVER_PORT = 4000;
+const SERVER_PORT = 4000;
 
 const log = logger.for('server');
 
@@ -25,6 +27,7 @@ export class GatewayServer {
         this.routesMiddleware();
         this.startElasticSearch();
         this.errorHandler(this.app);
+        this.startServer(this.app);
     }
 
     private securityMiddleware(app: Application): void {
@@ -74,5 +77,25 @@ export class GatewayServer {
             }
             next();
         });
+    }
+
+    private async startServer(app: Application): Promise<void> {
+        try {
+            const httpServer: http.Server = new http.Server(app);
+            this.startHttpServer(httpServer);
+        } catch (error) {
+            log.log('error', 'GatewayService startServer() error method:', error);
+        }
+    }
+
+    private async startHttpServer(httpServer: http.Server): Promise<void> {
+        try {
+            log.info(`Gateway server started with process ID ${process.pid}.`);
+            httpServer.listen(SERVER_PORT, () => {
+                log.info(`Gateway server running on port ${SERVER_PORT}`);
+            });
+        } catch (error) {
+            log.log('error', 'GatewayService startServer() error method:', error);
+        }
     }
 }
