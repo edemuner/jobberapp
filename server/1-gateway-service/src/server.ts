@@ -9,6 +9,8 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { StatusCodes } from 'http-status-codes';
 import { CustomError, IErrorResponse } from '@edemuner/jobber-shared';
+import { jobberConfig } from './config';
+import { elasticSearch } from './elasticsearch';
 
 const SERVER_PORT = 4000;
 
@@ -35,7 +37,7 @@ export class GatewayServer {
         app.use(
             cookieSession({
                 name: 'session',
-                keys: [],
+                keys: [`${jobberConfig.SECRET_KEY_ONE}`, `${jobberConfig.SECRET_KEY_TWO}`],
                 maxAge: 24 * 7 * 3600000,
                 secure: false // update with value from config
                 // sameSite: none
@@ -61,7 +63,7 @@ export class GatewayServer {
     }
 
     private startElasticSearch(): void {
-
+        elasticSearch.checkConnection();
     }
 
     private errorHandler(app: Application): void {

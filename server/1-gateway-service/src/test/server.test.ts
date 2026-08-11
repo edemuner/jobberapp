@@ -5,6 +5,12 @@ jest.mock('../logger', () => {
     const mockChildLogger = { log: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
     return { logger: { for: jest.fn(() => mockChildLogger) } };
 });
+jest.mock('../config', () => ({
+    jobberConfig: { SECRET_KEY_ONE: 'secret-one', SECRET_KEY_TWO: 'secret-two' }
+}));
+jest.mock('../elasticsearch', () => ({
+    elasticSearch: { checkConnection: jest.fn() }
+}));
 jest.mock('cookie-session', () => jest.fn(() => 'cookieSessionMiddleware'));
 jest.mock('cors', () => jest.fn(() => 'corsMiddleware'));
 jest.mock('hpp', () => jest.fn(() => 'hppMiddleware'));
@@ -37,6 +43,7 @@ import http from 'http';
 
 import { GatewayServer } from '../server';
 import { logger } from '../logger';
+import { elasticSearch } from '../elasticsearch';
 
 import type { Application, NextFunction, Request, Response } from 'express';
 
@@ -72,7 +79,7 @@ describe('GatewayServer', () => {
             expect(app.set).toHaveBeenCalledWith('trust proxy', 1);
             expect(cookieSession).toHaveBeenCalledWith({
                 name: 'session',
-                keys: [],
+                keys: ['secret-one', 'secret-two'],
                 maxAge: 24 * 7 * 3600000,
                 secure: false
             });
@@ -97,6 +104,8 @@ describe('GatewayServer', () => {
 
             expect(app.use).toHaveBeenCalledWith('*', expect.any(Function));
             expect(app.use).toHaveBeenCalledWith(expect.any(Function));
+
+            expect(elasticSearch.checkConnection).toHaveBeenCalledTimes(1);
 
             expect(mockHttpServerCtor).toHaveBeenCalledWith(app);
             expect(mockListen).toHaveBeenCalledWith(4000, expect.any(Function));
