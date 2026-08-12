@@ -11,6 +11,7 @@ import { StatusCodes } from 'http-status-codes';
 import { CustomError, IErrorResponse } from '@edemuner/jobber-shared';
 import { jobberConfig } from './config';
 import { elasticSearch } from './elasticsearch';
+import { appRoutes } from './routes';
 
 const SERVER_PORT = 4000;
 
@@ -26,7 +27,7 @@ export class GatewayServer {
     public start(): void {
         this.securityMiddleware(this.app);
         this.standardMiddleware(this.app);
-        this.routesMiddleware();
+        this.routesMiddleware(this.app);
         this.startElasticSearch();
         this.errorHandler(this.app);
         this.startServer(this.app);
@@ -58,8 +59,8 @@ export class GatewayServer {
         app.use(urlencoded({ extended: true, limit: '200mb' }));
     }
 
-    private routesMiddleware(): void {
-
+    private routesMiddleware(app: Application): void {
+        appRoutes(app);
     }
 
     private startElasticSearch(): void {
