@@ -18,7 +18,7 @@
 - Observability: Elasticsearch + Kibana, fed by Winston's Elasticsearch transport.
 - Email (scaffolded, not yet wired up): `nodemailer` + `email-templates` (ejs templating).
 - Media uploads: Cloudinary, via jobber-shared helpers.
-- Local dev infra: root `docker-compose.yaml` runs all datastores/messaging/observability; each service has its own `dev` script (nodemon + ts-node path registration).
+- Local dev infra: root `docker-compose.yaml` runs all datastores/messaging/observability; each service has its own `dev` script (nodemon + ts-node path registration). `notification-service` and, as of now, `gateway-service` also have containerized service blocks in the same `docker-compose.yaml` (built from each service's own `Dockerfile.dev`), so they can run either via `npm run dev` locally or as containers alongside the infra.
 
 ### Patterns observed in the code
 - Config: `dotenv` + a singleton `Config` class instance exported once (`export const jobberConfig = new Config()`) — not raw `process.env` access scattered through the code.
