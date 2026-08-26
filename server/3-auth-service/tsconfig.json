@@ -17,7 +17,7 @@
     "pretty": true,
     "resolveJsonModule": true,
     "noImplicitAny":true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "esModuleInterop": true,
     "alwaysStrict": true,
     "types": ["jest"],

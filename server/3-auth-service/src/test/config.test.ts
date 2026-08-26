@@ -21,6 +21,7 @@ describe('Config', () => {
     delete process.env.GATEWAY_JWT_TOKEN;
     delete process.env.RABBITMQ_ENDPOINT;
     delete process.env.ELASTIC_SEARCH_URL;
+    delete process.env.API_GATEWAY_URL;
 
     const { jobberConfig } = require('../config');
 
@@ -30,6 +31,7 @@ describe('Config', () => {
     expect(jobberConfig.GATEWAY_JWT_TOKEN).toBe('');
     expect(jobberConfig.RABBITMQ_ENDPOINT).toBe('');
     expect(jobberConfig.ELASTIC_SEARCH_URL).toBe('');
+    expect(jobberConfig.API_GATEWAY_URL).toBe('');
   });
 
   it('uses the provided env vars when they are set', () => {
@@ -39,6 +41,7 @@ describe('Config', () => {
     process.env.GATEWAY_JWT_TOKEN = 'gateway-jwt-secret';
     process.env.RABBITMQ_ENDPOINT = 'amqp://rabbitmq:5672';
     process.env.ELASTIC_SEARCH_URL = 'http://elasticsearch:9200';
+    process.env.API_GATEWAY_URL = 'http://gateway:4000';
 
     const { jobberConfig } = require('../config');
 
@@ -48,5 +51,6 @@ describe('Config', () => {
     expect(jobberConfig.GATEWAY_JWT_TOKEN).toBe('gateway-jwt-secret');
     expect(jobberConfig.RABBITMQ_ENDPOINT).toBe('amqp://rabbitmq:5672');
     expect(jobberConfig.ELASTIC_SEARCH_URL).toBe('http://elasticsearch:9200');
+    expect(jobberConfig.API_GATEWAY_URL).toBe('http://gateway:4000');
   });
 });

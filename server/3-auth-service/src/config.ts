@@ -9,6 +9,7 @@ class Config {
   public GATEWAY_JWT_TOKEN: string | undefined;
   public RABBITMQ_ENDPOINT: string | undefined;
   public ELASTIC_SEARCH_URL: string | undefined;
+  public API_GATEWAY_URL: string | undefined;
 
   constructor() {
     this.NODE_ENV = process.env.NODE_ENV || '';
@@ -17,6 +18,7 @@ class Config {
     this.GATEWAY_JWT_TOKEN = process.env.GATEWAY_JWT_TOKEN || '';
     this.RABBITMQ_ENDPOINT = process.env.RABBITMQ_ENDPOINT || '';
     this.ELASTIC_SEARCH_URL = process.env.ELASTIC_SEARCH_URL || '';
+    this.API_GATEWAY_URL = process.env.API_GATEWAY_URL || '';
   }
 }
 
