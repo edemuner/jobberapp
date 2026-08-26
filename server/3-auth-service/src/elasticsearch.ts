@@ -1,0 +1,24 @@
+import { Client } from '@elastic/elasticsearch';
+import { jobberConfig } from './config';
+import { logger } from './logger';
+import { ClusterHealthResponse } from '@elastic/elasticsearch/lib/api/types';
+
+const log = logger.for('authElasticSearchServer');
+
+export const elasticSearchClient = new Client({
+    node: `${jobberConfig.ELASTIC_SEARCH_URL}`
+});
+
+export async function checkConnection(): Promise<void>{
+    let isConnected = false;
+    while (!isConnected){
+        try {
+            const health: ClusterHealthResponse = await elasticSearchClient.cluster.health({});
+            log.info(`AuthService Elasticsearch health status - ${health.status}`);
+            isConnected = true;
+        } catch(error){
+            log.error('Connection To ElasticSearch failed. Retrying...');
+            log.log('error', 'AuthService checkConnection() method', error);
+        }
+    }
+}
