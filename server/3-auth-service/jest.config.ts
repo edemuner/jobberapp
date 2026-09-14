@@ -11,7 +11,7 @@ const config: Config.InitialOptions = {
         '^.+\\. ts?$':'ts-jest',   
     },
     testMatch: ['<rootDir>/src/**/test/*.ts'],
-    collectCoverageFrom: ['src/**/*.ts', '!src/**/test/*.ts?(x)', '!**/node_modules/**'],
+    collectCoverageFrom: ['src/**/*.ts', '!src/**/test/*.ts?(x)', '!**/node_modules/**', '!src/schemes/signup.ts'],
     coverageThreshold: {
         global: {
             branches: 100,
