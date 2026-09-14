@@ -11,6 +11,9 @@ jest.mock('../config', () => ({
 jest.mock('../elasticsearch', () => ({
     checkConnection: jest.fn()
 }));
+jest.mock('../routes', () => ({
+    appRoutes: jest.fn()
+}));
 jest.mock('hpp', () => jest.fn(() => 'hppMiddleware'));
 jest.mock('helmet', () => jest.fn(() => 'helmetMiddleware'));
 jest.mock('cors', () => jest.fn(() => 'corsMiddleware'));
@@ -43,6 +46,7 @@ import http from 'http';
 import { start } from '../server';
 import { logger } from '../logger';
 import { checkConnection } from '../elasticsearch';
+import { appRoutes } from '../routes';
 
 import type { Application, NextFunction, Request, Response } from 'express';
 
@@ -58,8 +62,6 @@ function createMockApp() {
 const flushMicrotasks = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('auth-service server', () => {
-    let consoleLogSpy: jest.SpyInstance;
-
     beforeEach(() => {
         jest.clearAllMocks();
         mockListen.mockImplementation((_port: number, cb: () => void) => {
@@ -67,11 +69,6 @@ describe('auth-service server', () => {
             return {};
         });
         mockHttpServerCtor.mockImplementation(() => ({ listen: mockListen }));
-        consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined);
-    });
-
-    afterEach(() => {
-        consoleLogSpy.mockRestore();
     });
 
     describe('start', () => {
@@ -100,7 +97,7 @@ describe('auth-service server', () => {
             expect(urlencoded).toHaveBeenCalledWith({ extended: true, limit: '200mb' });
             expect(app.use).toHaveBeenCalledWith('urlencodedMiddleware');
 
-            expect(consoleLogSpy).toHaveBeenCalledWith(app);
+            expect(appRoutes).toHaveBeenCalledWith(app);
 
             expect(checkConnection).toHaveBeenCalledTimes(1);
 

@@ -10,6 +10,7 @@ import { CustomError, IAuthPayload, IErrorResponse } from '@edemuner/jobber-shar
 import { verify } from 'jsonwebtoken';
 import { checkConnection } from './elasticsearch';
 import { StatusCodes } from 'http-status-codes';
+import { appRoutes } from './routes';
 
 const log = logger.for('authDatabaseServer');
 const SERVER_PORT = 4002;
@@ -53,7 +54,7 @@ function standardMiddleware(app: Application): void {
 }
 
 function routesMiddleware(app: Application): void {
-    console.log(app);
+    appRoutes(app);
 }
 
 async function startQueues(): Promise<void>{
