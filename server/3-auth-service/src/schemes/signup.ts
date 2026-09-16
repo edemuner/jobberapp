@@ -33,6 +33,7 @@ const signupSchema: ObjectSchema = Joi.object().keys({
         }),
 
     email: Joi.string()
+        .email()
         .min(4)
         .max(12)
         .required()
@@ -53,3 +54,5 @@ const signupSchema: ObjectSchema = Joi.object().keys({
 
 
 });
+
+export { signupSchema }
