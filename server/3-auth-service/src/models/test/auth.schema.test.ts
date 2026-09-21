@@ -66,6 +66,13 @@ describe('AuthModel', () => {
         await expect(AuthModel.prototype.comparePassword('wrong-password', hashedPassword)).resolves.toBe(false);
     });
 
+    it('hashes a password with the model helper', async () => {
+        const hashedPassword = await AuthModel.prototype.hashPassword('plain-password');
+
+        expect(hashedPassword).not.toBe('plain-password');
+        await expect(compare('plain-password', hashedPassword)).resolves.toBe(true);
+    });
+
     it('synchronizes the model after defining it', () => {
         expect(fakeModel.sync).toHaveBeenCalledWith({});
     });

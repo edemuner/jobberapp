@@ -10,6 +10,7 @@ type AuthUserCreationAttributes = Optional<AuthAttributes, 'id' | 'createdAt' | 
 
 interface AuthModelInstance extends Model<AuthAttributes, AuthUserCreationAttributes> {
     comparePassword(password: string, hashedPassword: string): Promise<boolean>;
+    hashPassword(password: string): Promise<string>;
 }
 
 const AuthModel = sequelize.define<AuthModelInstance, AuthUserCreationAttributes>('auths', {
@@ -81,6 +82,10 @@ AuthModel.addHook('beforeCreate', async (auth: Model) => {
 
 AuthModel.prototype.comparePassword = async function (password: string, hashedPassword: string): Promise<boolean> {
     return compare(password, hashedPassword);
+}
+
+AuthModel.prototype.hashPassword = async function (password: string): Promise<string> {
+    return hash(password, SALT_ROUND);
 }
 
 // force: true always deletes the table
