@@ -1,10 +1,18 @@
 import { sequelize } from "@auth/database";
 import { IAuthDocument } from "@edemuner/jobber-shared";
-import { DataTypes, ModelDefined, Optional } from "sequelize";
+import { compare, hash } from "bcryptjs";
+import { DataTypes, Model, Optional } from "sequelize";
 
-type AuthUserCreationAttributes = Optional<IAuthDocument, 'id' | 'createdAt' | 'passwordResetToken' | 'passwordResetExpires'>;
+const SALT_ROUND = 10;
 
-const AuthModel: ModelDefined<IAuthDocument, AuthUserCreationAttributes> = sequelize.define('auths', {
+type AuthAttributes = Omit<IAuthDocument, 'comparePassword' | 'hashPassword'>;
+type AuthUserCreationAttributes = Optional<AuthAttributes, 'id' | 'createdAt' | 'passwordResetToken' | 'passwordResetExpires'>;
+
+interface AuthModelInstance extends Model<AuthAttributes, AuthUserCreationAttributes> {
+    comparePassword(password: string, hashedPassword: string): Promise<boolean>;
+}
+
+const AuthModel = sequelize.define<AuthModelInstance, AuthUserCreationAttributes>('auths', {
     username: {
         type: DataTypes.STRING,
         allowNull: false
@@ -51,6 +59,30 @@ const AuthModel: ModelDefined<IAuthDocument, AuthUserCreationAttributes> = seque
         allowNull: true
     },
 
-})
+}, {
+    indexes: [
+        {
+            unique: true,
+            fields: ['email']
+        },
+        {
+            unique:true,
+            fields: ['username']
+        }
+    ]
+}) as ReturnType<typeof sequelize.define<AuthModelInstance, AuthUserCreationAttributes>> & {
+    prototype: AuthModelInstance;
+};
 
+AuthModel.addHook('beforeCreate', async (auth: Model) => {
+    const hashedPassword: string = await hash(auth.dataValues.password as string, SALT_ROUND);
+    auth.dataValues.password = hashedPassword;
+});
+
+AuthModel.prototype.comparePassword = async function (password: string, hashedPassword: string): Promise<boolean> {
+    return compare(password, hashedPassword);
+}
+
+// force: true always deletes the table
+AuthModel.sync({});
 export { AuthModel }
