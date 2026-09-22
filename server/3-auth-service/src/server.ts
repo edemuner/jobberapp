@@ -11,9 +11,13 @@ import { verify } from 'jsonwebtoken';
 import { checkConnection } from './elasticsearch';
 import { StatusCodes } from 'http-status-codes';
 import { appRoutes } from './routes';
+import { Channel } from 'amqplib';
+import { createConnection } from './queues/connection';
 
 const log = logger.for('authDatabaseServer');
 const SERVER_PORT = 4002;
+
+export let authChannel: Channel;
 
 export function start(app: Application): void {
     securityMiddleware(app);
@@ -58,7 +62,7 @@ function routesMiddleware(app: Application): void {
 }
 
 async function startQueues(): Promise<void>{
-
+    authChannel = await createConnection() as Channel;
 }
 
 function startElasticSearch(): void {
