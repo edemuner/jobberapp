@@ -69,6 +69,10 @@ const AuthModel = sequelize.define<AuthModelInstance, AuthUserCreationAttributes
         {
             unique:true,
             fields: ['username']
+        },
+        {
+            unique:true,
+            fields: ['emailVerificationToken']
         }
     ]
 }) as ReturnType<typeof sequelize.define<AuthModelInstance, AuthUserCreationAttributes>> & {
