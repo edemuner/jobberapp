@@ -23,6 +23,7 @@
     "@elastic/elasticsearch": "^9.5.0",
     "amqplib": "^2.0.1",
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
     "compression": "^1.8.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -38,6 +39,7 @@
     "sequelize": "^6.37.8",
     "typescript": "^6.0.3",
     "typescript-transform-paths": "^4.0.0",
+    "uuid": "^14.0.2",
     "winston": "^3.19.0"
   },
   "devDependencies": {
