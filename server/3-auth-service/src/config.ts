@@ -5,7 +5,7 @@ dotenv.config({});
 class Config {
   public NODE_ENV: string | undefined;
   public CLIENT_URL: string | undefined;
-  public JWT_TOKEN: string | undefined;
+  public JWT_TOKEN: string;
   public GATEWAY_JWT_TOKEN: string | undefined;
   public RABBITMQ_ENDPOINT: string | undefined;
   public ELASTIC_SEARCH_URL: string | undefined;

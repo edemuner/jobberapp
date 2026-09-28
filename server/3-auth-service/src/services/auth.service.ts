@@ -4,6 +4,8 @@ import { authChannel } from "@auth/server";
 import { firstLetterUppercase, IAuthBuyerMessageDetails, IAuthDocument, lowerCase } from "@edemuner/jobber-shared";
 import { Model, Op } from "sequelize";
 import { omit } from 'lodash';
+import { sign } from "jsonwebtoken";
+import { jobberConfig } from "@auth/config";
 
 export async function createAuthUser(data: IAuthDocument): Promise<IAuthDocument>{
     const result: Model = await AuthModel.create(data);
@@ -94,4 +96,46 @@ export async function getAuthUserByPasswordToken(token: string): Promise<IAuthDo
     }) as Model;
 
     return user.dataValues;
+}
+
+export async function updateVerifyEmailField(authId: number, emailVerified: number, emailVerificationToken: string): Promise<void> {
+    await AuthModel.update(
+        {
+            emailVerified,
+            emailVerificationToken
+        },
+        { where: { id: authId }}
+    );
+
+}
+
+export async function updatePasswordToken(authId: number, token: string, tokenExpiration: Date): Promise<void> {
+    await AuthModel.update(
+        {
+            passwordResetToken: token,
+            passwordResetExpires: tokenExpiration
+        },
+        { where: { id: authId }}
+    );
+
+}
+
+export async function updatePassword(authId: number, password: string, tokenExpiration: Date): Promise<void> {
+    await AuthModel.update(
+        {
+            password,
+            passwordResetToken: '',
+            passwordResetExpires: new Date()
+        },
+        { where: { id: authId }}
+    );
+
+}
+
+export function signToken(id: number, email: string, userName: string): string {
+    return sign({
+        id,
+        email,
+        userName
+    }, jobberConfig.JWT_TOKEN)
 }

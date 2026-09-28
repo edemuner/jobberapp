@@ -1,10 +1,12 @@
 const mockAuthChannel = { name: 'auth-channel' };
 const mockCreate = jest.fn();
 const mockFindOne = jest.fn();
+const mockUpdate = jest.fn();
 const mockPublishDirectMessage = jest.fn();
+const mockSign = jest.fn();
 
 jest.mock('@auth/models/auth.schema', () => ({
-    AuthModel: { create: mockCreate, findOne: mockFindOne }
+    AuthModel: { create: mockCreate, findOne: mockFindOne, update: mockUpdate }
 }));
 jest.mock('@auth/queues/auth.producer', () => ({
     publishDirectMessage: mockPublishDirectMessage
@@ -12,6 +14,7 @@ jest.mock('@auth/queues/auth.producer', () => ({
 jest.mock('@auth/server', () => ({
     authChannel: mockAuthChannel
 }));
+jest.mock('jsonwebtoken', () => ({ sign: mockSign }));
 
 import {
     createAuthUser,
@@ -20,7 +23,11 @@ import {
     getAuthUserByPasswordToken,
     getAuthUserByUsername,
     getAuthUserByUsernameOrEmail,
-    getAuthUserByVerificationToken
+    getAuthUserByVerificationToken,
+    signToken,
+    updatePassword,
+    updatePasswordToken,
+    updateVerifyEmailField
 } from '../auth.service';
 import { IAuthDocument } from '@edemuner/jobber-shared';
 import { Op } from 'sequelize';
@@ -148,5 +155,65 @@ describe('createAuthUser', () => {
         expect(expiry.getTime()).toBeGreaterThanOrEqual(beforeCall.getTime());
         expect(expiry.getTime()).toBeLessThanOrEqual(afterCall.getTime());
         expect(query.attributes).toEqual({ exclude: ['password'] });
+    });
+});
+
+describe('auth user updates', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('updates the email verification fields', async () => {
+        mockUpdate.mockResolvedValueOnce([1]);
+
+        await updateVerifyEmailField(7, 1, 'verification-token');
+
+        expect(mockUpdate).toHaveBeenCalledWith(
+            { emailVerified: 1, emailVerificationToken: 'verification-token' },
+            { where: { id: 7 } }
+        );
+    });
+
+    it('updates the password reset token and expiry', async () => {
+        const expiration = new Date('2026-02-01T00:00:00.000Z');
+        mockUpdate.mockResolvedValueOnce([1]);
+
+        await updatePasswordToken(7, 'reset-token', expiration);
+
+        expect(mockUpdate).toHaveBeenCalledWith(
+            { passwordResetToken: 'reset-token', passwordResetExpires: expiration },
+            { where: { id: 7 } }
+        );
+    });
+
+    it('updates the password and clears the reset token', async () => {
+        mockUpdate.mockResolvedValueOnce([1]);
+
+        await updatePassword(7, 'new-password', new Date('2026-02-01T00:00:00.000Z'));
+
+        expect(mockUpdate).toHaveBeenCalledWith(
+            expect.objectContaining({
+                password: 'new-password',
+                passwordResetToken: ''
+            }),
+            { where: { id: 7 } }
+        );
+        expect(mockUpdate.mock.calls[0][0].passwordResetExpires).toBeInstanceOf(Date);
+    });
+});
+
+describe('signToken', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        mockSign.mockReturnValue('signed-token');
+    });
+
+    it('signs the auth payload with the configured JWT secret', () => {
+        expect(signToken(7, 'alice@example.com', 'Alice')).toBe('signed-token');
+
+        expect(mockSign).toHaveBeenCalledWith(
+            { id: 7, email: 'alice@example.com', userName: 'Alice' },
+            expect.any(String)
+        );
     });
 });
